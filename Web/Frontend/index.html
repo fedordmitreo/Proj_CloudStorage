@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход / Регистрация</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+<div class="container">
+    <div class="form-container sign-in-container">
+        <form action="#" method="post">
+            <h1>Вход</h1>
+            <input type="email" placeholder="Email" required />
+            <input type="password" placeholder="Пароль" required />
+            <a href="page.html">Забыли пароль?</a>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+    
+
+    <div class="form-container sign-up-container">
+        <form action="#" method="signup">
+            <h1>Регистрация</h1>
+            <input type="text" placeholder="Имя" required />
+            <input type="email" placeholder="Email" required />
+            <input type="password" placeholder="Пароль" required />
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+    </div>
+    <!-- Кнопка смены языка -->
+    <div id="languageSwitcher">
+        <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
+        <button onclick="setLanguage('en')">🇬🇧 English</button>
+    </div>
+
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-panel overlay-left">
+                <h1 data-lang="welcome">Привет!</h1>
+                <p data-lang="description-singup">Чтобы войти, нажмите "Войти"</p>
+                <button class="ghost" id="signIn" lang-lang="signin">Войти</button>
+            </div>
+            <div class="overlay-panel overlay-right">
+                <h1 data-lang="welcome">Привет!</h1>
+                <p data-lang="description-singin">Введите свои данные и зарегистрируйтесь</p>
+                <button class="ghost" id="signUp" data-lang="signup">Регистрация</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>
