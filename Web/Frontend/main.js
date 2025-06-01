@@ -2,6 +2,7 @@ const signUpButton = document.getElementById('signUp');
 const signInButton = document.getElementById('signIn');
 const container = document.querySelector('.container');
 
+
 signUpButton.addEventListener('click', () => {
     container.classList.add("right-panel-active");
 });
@@ -58,66 +59,59 @@ window.addEventListener('load', function () {
 
 });
 
-// Устанавливаем язык и сохраняем его в cookie
-function setLanguage(lang) {
-    // Сохраняем в cookie на 30 дней
-    setCookie("site_lang", lang, 30);
-    
-    // Обновляем текст на странице
-    updateContent(lang);
-}
-
-// Функция обновления текста на странице
-function updateContent(lang) {
-    document.querySelectorAll("[data-lang]").forEach(el => {
-        const key = el.getAttribute("data-lang");
-        el.textContent = langStrings[lang][key] || el.textContent;
-    });
-}
-
-// Функция для работы с cookie
-function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
-    }
-    return null;
-}
-
-// Словарь переводов
 const langStrings = {
     "ru": {
         "welcome": "Добро пожаловать!",
         "description-singup": "Введите свои данные и зарегистрируйтесь",
         "description-singin": "Введите свои данные для входа в систему",
         "signin": "Войти",
-        "signup": "Регистрация"
+        "signup": "Зарегистрироваться",
+        "registration": "Регистрация"
     },
     "en": {
         "welcome": "Welcome!",
-        "descrdescription-singup": "Enter your details and register",
+        "description-singup": "Enter your details and register",
         "description-singin": "Please enter your login details.",
         "signin": "Sign In",
-        "signup": "Sign Up"
+        "signup": "Sign Up",
+        "registration": "Регистрация"
     }
 };
 
-// При загрузке страницы: проверяем cookie и устанавливаем нужный язык
-window.addEventListener("load", () => {
-    const savedLang = getCookie("site_lang") || "en"; // по умолчанию русский
+function setLanguage(lang) {
+    document.cookie = `site_lang=${lang}; path=/; max-age=31536000`;
+    updateContent(lang);
+
+    const langSelect = document.getElementById("langSelect");
+    if (langSelect) langSelect.value = lang;
+}
+
+function getCookie(name) {
+    const value = "; " + document.cookie;
+    const parts = value.split("; " + name + "=");
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+}
+
+function updateContent(lang) {
+    document.querySelectorAll("[data-lang]").forEach(el => {
+        const key = el.getAttribute("data-lang");
+        if (langStrings[lang] && langStrings[lang][key]) {
+            el.textContent = langStrings[lang][key];
+        }
+    });
+}
+
+window.onload = () => {
+    const savedLang = getCookie("site_lang") || "ru";
     updateContent(savedLang);
 
-});
+    const langSelect = document.getElementById("langSelect");
+    if (langSelect) langSelect.value = savedLang;
+
+    // Обработчик смены языка через выпадающий список
+    langSelect.addEventListener("change", function () {
+        const selectedLang = this.value;
+        setLanguage(selectedLang);
+    });
+};

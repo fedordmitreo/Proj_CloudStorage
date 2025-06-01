@@ -4,9 +4,40 @@
     <meta charset="UTF-8">
     <title>Вход / Регистрация</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Стиль для кнопки смены языка */
+        #languageSwitcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        #langSelect {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        #langSelect option {
+            background-color: white;
+            color: black;
+        }
+    </style>
 </head>
 <body>
 
+<div id="languageSwitcher">
+    <select id="langSelect">
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="en">🇬🇧 English</option>
+    </select>
+</div>
 
 <div class="container">
     <div class="form-container sign-in-container">
@@ -22,25 +53,19 @@
 
     <div class="form-container sign-up-container">
         <form action="#" method="signup">
-            <h1>Регистрация</h1>
+            <h1 data-lang="registration">Регистрация</h1>
             <input type="text" placeholder="Имя" required />
             <input type="email" placeholder="Email" required />
             <input type="password" placeholder="Пароль" required />
-            <button type="submit">Зарегистрироваться</button>
+            <button type="submit" data-lang="signup">Зарегистрироваться</button>
         </form>
     </div>
-    <!-- Кнопка смены языка -->
-    <div id="languageSwitcher">
-        <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
-        <button onclick="setLanguage('en')">🇬🇧 English</button>
-    </div>
-
     <div class="overlay-container">
         <div class="overlay">
             <div class="overlay-panel overlay-left">
                 <h1 data-lang="welcome">Привет!</h1>
                 <p data-lang="description-singup">Чтобы войти, нажмите "Войти"</p>
-                <button class="ghost" id="signIn" lang-lang="signin">Войти</button>
+                <button class="ghost" id="signIn" data-lang="signin">Войти</button>
             </div>
             <div class="overlay-panel overlay-right">
                 <h1 data-lang="welcome">Привет!</h1>
@@ -49,7 +74,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 <script src="main.js"></script>
 </body>
