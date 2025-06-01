@@ -1,3 +1,62 @@
+const langStrings = {
+    "ru": {
+        "welcome": "Добро пожаловать!",
+        "description-singup": "Введите свои данные и зарегистрируйтесь",
+        "description-singin": "Введите свои данные для входа в систему",
+        "signin": "Войти",
+        "signup": "Зарегистрироваться",
+        "registration": "Регистрация", 
+        "forget": "Забыли пароль?"
+    },
+    "en": {
+        "welcome": "Welcome!",
+        "description-singup": "Enter your details and register",
+        "description-singin": "Please enter your login details.",
+        "signin": "Sign In",
+        "signup": "Sign Up",
+        "registration": "Регистрация", 
+        "forget": "Forgot your password?"
+    }
+};
+
+function setLanguage(lang) {
+    document.documentElement.setAttribute("lang", lang);
+    document.cookie = `site_lang=${lang}; path=/; max-age=31536000`;
+    updateContent(lang);
+
+    const langSelect = document.getElementById("langSelect");
+    if (langSelect) langSelect.value = lang;
+}
+
+function getCookie(name) {
+    const value = "; " + document.cookie;
+    const parts = value.split("; " + name + "=");
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+}
+
+function updateContent(lang) {
+    document.querySelectorAll("[data-lang]").forEach(el => {
+        const key = el.getAttribute("data-lang");
+        if (langStrings[lang] && langStrings[lang][key]) {
+            el.textContent = langStrings[lang][key];
+        }
+    });
+}
+
+window.onload = () => {
+    const savedLang = getCookie("site_lang") || "ru";
+    updateContent(savedLang);
+
+    const langSelect = document.getElementById("langSelect");
+    if (langSelect) langSelect.value = savedLang;
+
+    langSelect.addEventListener("change", function () {
+        const selectedLang = this.value;
+        setLanguage(selectedLang);
+    });
+};
+
 const signUpButton = document.getElementById('signUp');
 const signInButton = document.getElementById('signIn');
 const container = document.querySelector('.container');
@@ -58,60 +117,3 @@ window.addEventListener('load', function () {
     }
 
 });
-
-const langStrings = {
-    "ru": {
-        "welcome": "Добро пожаловать!",
-        "description-singup": "Введите свои данные и зарегистрируйтесь",
-        "description-singin": "Введите свои данные для входа в систему",
-        "signin": "Войти",
-        "signup": "Зарегистрироваться",
-        "registration": "Регистрация"
-    },
-    "en": {
-        "welcome": "Welcome!",
-        "description-singup": "Enter your details and register",
-        "description-singin": "Please enter your login details.",
-        "signin": "Sign In",
-        "signup": "Sign Up",
-        "registration": "Регистрация"
-    }
-};
-
-function setLanguage(lang) {
-    document.cookie = `site_lang=${lang}; path=/; max-age=31536000`;
-    updateContent(lang);
-
-    const langSelect = document.getElementById("langSelect");
-    if (langSelect) langSelect.value = lang;
-}
-
-function getCookie(name) {
-    const value = "; " + document.cookie;
-    const parts = value.split("; " + name + "=");
-    if (parts.length === 2) return parts.pop().split(";").shift();
-    return null;
-}
-
-function updateContent(lang) {
-    document.querySelectorAll("[data-lang]").forEach(el => {
-        const key = el.getAttribute("data-lang");
-        if (langStrings[lang] && langStrings[lang][key]) {
-            el.textContent = langStrings[lang][key];
-        }
-    });
-}
-
-window.onload = () => {
-    const savedLang = getCookie("site_lang") || "ru";
-    updateContent(savedLang);
-
-    const langSelect = document.getElementById("langSelect");
-    if (langSelect) langSelect.value = savedLang;
-
-    // Обработчик смены языка через выпадающий список
-    langSelect.addEventListener("change", function () {
-        const selectedLang = this.value;
-        setLanguage(selectedLang);
-    });
-};

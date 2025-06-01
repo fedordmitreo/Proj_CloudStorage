@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f9; 
+        }
+
+        /* Левая панель */
+        .sidebar {
+            width: 220px;
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            color: #007BFF;
+        }
+
+        /* Основной контент */
+        .main {
+            flex-grow: 1;
+            position: relative;
+            padding: 30px;
+        }
+
+        .top-nav {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .account-icon {
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        #langSelect {
+            padding: 6px 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: white;
+            color: #333;
+        }
+
+        .content {
+            margin-top: 60px;
+        }
+
+        .content h1 {
+            font-size: 28px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Левая панель -->
+    <div class="sidebar">
+        <h2><a href="#" data-lang="my_files">Ваши файлы</a></h2>
+        <h2><a href="#" data-lang="trash">Корзина</a></h2>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="main">
+        <div class="top-nav">
+            <!-- Иконка аккаунта -->
+            <div class="account-icon" title="Аккаунт">👤</div>
+
+            <!-- Выбор языка -->
+            <select id="langSelect">
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="en">🇬🇧 English</option>
+            </select>
+        </div>
+
+        <!-- Контент -->
+        <div class="content">
+            <h1 data-lang="welcome_dashboard">Добро пожаловать в ваш кабинет!</h1>
+        </div>
+    </div>
+
+    <!-- Скрипт перевода -->
+    <script src="dashboard.js"></script>
+</body>
+</html>
