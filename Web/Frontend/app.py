@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, render_template
 import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -7,7 +7,7 @@ FILES_DIR = os.path.join(app.root_path, 'static', 'files')
 
 @app.route('/')
 def index():
-    return app.send_static_file('dashboard.html')
+    return render_template('Dashboard.html')
 
 @app.route('/api/files')
 def list_files():

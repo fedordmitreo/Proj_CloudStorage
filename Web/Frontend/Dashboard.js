@@ -21,36 +21,15 @@ const langStrings = {
   }
 };
 
-// Инициализация файлов и корзины из localStorage или по умолчанию
 let files = [];
 let trash = [];
 
-const savedFiles = localStorage.getItem("user_files");
-const savedTrash = localStorage.getItem("user_trash");
-
-if (savedFiles) {
-  files = JSON.parse(savedFiles);
-} else {
-  files = [
-    { name: "document1.pdf", path: "files/document1.pdf" },
-    { name: "image1.jpg", path: "files/image1.jpg" },
-    { name: "example.txt", path: "files/example.txt" }
-  ];
+// Получаем язык
+function getLanguage() {
+  return localStorage.getItem("site_lang") || "ru";
 }
 
-if (savedTrash) {
-  trash = JSON.parse(savedTrash);
-} else {
-  trash = [];
-}
-
-// Функция для сохранения файлов и корзины в localStorage
-function saveDataToLocalStorage() {
-  localStorage.setItem("user_files", JSON.stringify(files));
-  localStorage.setItem("user_trash", JSON.stringify(trash));
-}
-
-// Смена языка
+// Сохраняем язык
 function setLanguage(lang) {
   document.documentElement.setAttribute("lang", lang);
   localStorage.setItem("site_lang", lang);
@@ -60,12 +39,17 @@ function setLanguage(lang) {
   if (langSelect) langSelect.value = lang;
 }
 
-// Получаем язык
-function getLanguage() {
-  return localStorage.getItem("site_lang") || "ru";
+// Обновляем текст на странице
+function updateContent(lang) {
+  document.querySelectorAll("[data-lang]").forEach(el => {
+    const key = el.getAttribute("data-lang");
+    if (langStrings[lang] && langStrings[lang][key]) {
+      el.textContent = langStrings[lang][key];
+    }
+  });
 }
 
-// Сохраняем в localStorage
+// Сохраняем данные в localStorage
 function saveDataToLocalStorage() {
   localStorage.setItem("user_trash", JSON.stringify(trash));
 }
@@ -89,6 +73,21 @@ async function loadFilesFromServer() {
     alert('Не удалось загрузить список файлов.');
   }
 }
+
+// Отображение раздела: "Ваши файлы" или "Корзина"
+function showSection(section) {
+  const content = document.getElementById("sectionContent");
+  content.innerHTML = "";
+
+  let list = section === "files" ? files : trash;
+
+  if (list.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = langStrings[getCurrentLang()][section === "files" ? "no_files" : "no_trash"];
+    content.appendChild(p);
+    return;
+  }
+
   const ul = document.createElement("div");
   ul.className = "file-list";
 
@@ -130,8 +129,9 @@ async function loadFilesFromServer() {
   });
 
   content.appendChild(ul);
+}
 
-
+// Перемещение файла в корзину
 function moveToFileTrash(index, section) {
   if (section === "files") {
     trash.push(files[index]);
@@ -144,6 +144,7 @@ function moveToFileTrash(index, section) {
   showSection(section === "files" ? "files" : "trash");
 }
 
+// Восстановление из корзины
 function restoreFromTrash(index) {
   files.push(trash[index]);
   trash.splice(index, 1);
@@ -152,6 +153,7 @@ function restoreFromTrash(index) {
   showSection("files");
 }
 
+// Получаем текущий язык
 function getCurrentLang() {
   return getLanguage();
 }
