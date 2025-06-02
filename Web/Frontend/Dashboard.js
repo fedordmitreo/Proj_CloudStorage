@@ -24,12 +24,10 @@ const langStrings = {
 let files = [];
 let trash = [];
 
-// Получаем язык
 function getLanguage() {
   return localStorage.getItem("site_lang") || "ru";
 }
 
-// Сохраняем язык
 function setLanguage(lang) {
   document.documentElement.setAttribute("lang", lang);
   localStorage.setItem("site_lang", lang);
@@ -39,7 +37,6 @@ function setLanguage(lang) {
   if (langSelect) langSelect.value = lang;
 }
 
-// Обновляем текст на странице
 function updateContent(lang) {
   document.querySelectorAll("[data-lang]").forEach(el => {
     const key = el.getAttribute("data-lang");
@@ -49,12 +46,10 @@ function updateContent(lang) {
   });
 }
 
-// Сохраняем данные в localStorage
 function saveDataToLocalStorage() {
   localStorage.setItem("user_trash", JSON.stringify(trash));
 }
 
-// Загружаем список файлов с помощью fetch
 async function loadFilesFromServer() {
   try {
     const response = await fetch('/api/files');
@@ -63,7 +58,6 @@ async function loadFilesFromServer() {
     const data = await response.json();
     files = data;
 
-    // Проверяем корзину
     const savedTrash = localStorage.getItem("user_trash");
     trash = savedTrash ? JSON.parse(savedTrash) : [];
 
@@ -74,7 +68,6 @@ async function loadFilesFromServer() {
   }
 }
 
-// Отображение раздела: "Ваши файлы" или "Корзина"
 function showSection(section) {
   const content = document.getElementById("sectionContent");
   content.innerHTML = "";
@@ -88,50 +81,60 @@ function showSection(section) {
     return;
   }
 
-  const ul = document.createElement("div");
-  ul.className = "file-list";
+  // Создаем таблицу
+  const table = document.createElement("table");
+  table.className = "file-table";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  ["Имя файла", "Действия"].forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
 
   list.forEach((file, index) => {
-    const li = document.createElement("div");
-    li.className = "file-item";
+    const row = document.createElement("tr");
 
-    const span = document.createElement("span");
-    span.className = "file-name";
-    span.textContent = file.name;
+    const nameCell = document.createElement("td");
+    nameCell.textContent = file.name;
+    row.appendChild(nameCell);
 
-    const actions = document.createElement("div");
-    actions.className = "file-actions";
+    const actionsCell = document.createElement("td");
 
     const downloadBtn = document.createElement("button");
     downloadBtn.textContent = langStrings[getCurrentLang()]["download"];
+    downloadBtn.className = "download-btn";
     downloadBtn.onclick = () => window.open(file.path);
+    actionsCell.appendChild(downloadBtn);
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = langStrings[getCurrentLang()]["delete"];
-    deleteBtn.className = "delete-btn";
-    deleteBtn.onclick = () => moveToFileTrash(index, section);
-
-    if (section === "trash") {
+    if (section === "files") {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = langStrings[getCurrentLang()]["delete"];
+      deleteBtn.className = "delete-btn";
+      deleteBtn.onclick = () => moveToFileTrash(index, section);
+      actionsCell.appendChild(deleteBtn);
+    } else if (section === "trash") {
       const restoreBtn = document.createElement("button");
       restoreBtn.textContent = langStrings[getCurrentLang()]["restore"];
       restoreBtn.className = "restore-btn";
       restoreBtn.onclick = () => restoreFromTrash(index);
-      actions.appendChild(restoreBtn);
+      actionsCell.appendChild(restoreBtn);
     }
 
-    actions.appendChild(downloadBtn);
-    actions.appendChild(deleteBtn);
-
-    li.appendChild(span);
-    li.appendChild(actions);
-
-    ul.appendChild(li);
+    row.appendChild(nameCell);
+    row.appendChild(actionsCell);
+    tbody.appendChild(row);
   });
 
-  content.appendChild(ul);
+  table.appendChild(tbody);
+  content.appendChild(table);
 }
 
-// Перемещение файла в корзину
 function moveToFileTrash(index, section) {
   if (section === "files") {
     trash.push(files[index]);
@@ -140,20 +143,17 @@ function moveToFileTrash(index, section) {
     trash.splice(index, 1);
   }
 
-  saveDataToLocalStorage(); // Сохраняем в localStorage
+  saveDataToLocalStorage();
   showSection(section === "files" ? "files" : "trash");
 }
 
-// Восстановление из корзины
 function restoreFromTrash(index) {
   files.push(trash[index]);
   trash.splice(index, 1);
-
-  saveDataToLocalStorage(); // Сохраняем в localStorage
-  showSection("files");
+  saveDataToLocalStorage();
+  showSection("trash");
 }
 
-// Получаем текущий язык
 function getCurrentLang() {
   return getLanguage();
 }
@@ -163,12 +163,13 @@ window.onload = () => {
   updateContent(savedLang);
 
   const langSelect = document.getElementById("langSelect");
-  if (langSelect) langSelect.value = savedLang;
+  if (langSelect) {
+    langSelect.value = savedLang;
+    langSelect.addEventListener("change", function () {
+      const selectedLang = this.value;
+      setLanguage(selectedLang);
+    });
+  }
 
-  langSelect.addEventListener("change", function () {
-    const selectedLang = this.value;
-    setLanguage(selectedLang);
-  });
-
-  loadFilesFromServer(); // Загружаем файлы
+  loadFilesFromServer();
 };

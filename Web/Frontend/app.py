@@ -9,7 +9,7 @@ FILES_DIR = os.path.join(app.root_path, 'static', 'files')
 def index():
     return render_template('Dashboard.html')
 
-@app.route('/api')
+@app.route('/api/files')
 def list_files():
     if not os.path.exists(FILES_DIR):
         os.makedirs(FILES_DIR)
