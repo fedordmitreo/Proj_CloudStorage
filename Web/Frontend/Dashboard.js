@@ -60,32 +60,35 @@ function setLanguage(lang) {
   if (langSelect) langSelect.value = lang;
 }
 
+// Получаем язык
 function getLanguage() {
   return localStorage.getItem("site_lang") || "ru";
 }
 
-function updateContent(lang) {
-  document.querySelectorAll("[data-lang]").forEach(el => {
-    const key = el.getAttribute("data-lang");
-    if (langStrings[lang] && langStrings[lang][key]) {
-      el.textContent = langStrings[lang][key];
-    }
-  });
+// Сохраняем в localStorage
+function saveDataToLocalStorage() {
+  localStorage.setItem("user_trash", JSON.stringify(trash));
 }
 
-function showSection(section) {
-  const content = document.getElementById("sectionContent");
-  content.innerHTML = "";
+// Загружаем список файлов с помощью fetch
+async function loadFilesFromServer() {
+  try {
+    const response = await fetch('/api/files');
+    if (!response.ok) throw new Error('Не удалось загрузить файлы');
 
-  let list = section === "files" ? files : trash;
+    const data = await response.json();
+    files = data;
 
-  if (list.length === 0) {
-    const p = document.createElement("p");
-    p.textContent = langStrings[getCurrentLang()][section === "files" ? "no_files" : "no_trash"];
-    content.appendChild(p);
-    return;
+    // Проверяем корзину
+    const savedTrash = localStorage.getItem("user_trash");
+    trash = savedTrash ? JSON.parse(savedTrash) : [];
+
+    showSection("files");
+  } catch (error) {
+    console.error('Ошибка при загрузке файлов:', error);
+    alert('Не удалось загрузить список файлов.');
   }
-
+}
   const ul = document.createElement("div");
   ul.className = "file-list";
 
@@ -127,7 +130,7 @@ function showSection(section) {
   });
 
   content.appendChild(ul);
-}
+
 
 function moveToFileTrash(index, section) {
   if (section === "files") {
@@ -165,5 +168,5 @@ window.onload = () => {
     setLanguage(selectedLang);
   });
 
-  showSection("files");
+  loadFilesFromServer(); // Загружаем файлы
 };
