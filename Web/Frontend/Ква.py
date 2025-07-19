@@ -1,4 +1,4 @@
-import asyncpg
+import psycopg2
 
 HOST = "10.0.0.102"
 PASSWORD = "postgres"
@@ -6,16 +6,20 @@ PORT = "5432"
 USER = "postgres"
 DB_NAME = "postgres"
 
-h = "kva@raika.g"
-g = "Ertyuiop123456789"
 
-async def g(h, g):
-    conn = await asyncpg.connect(
+
+def gtr(h, g):
+    conn = psycopg2.connect(
         host=HOST,
         user=USER,
         password=PASSWORD,
         database=DB_NAME,
         port=PORT
     )
-    await conn.fetch("insert table values ('$1', '$2')", h, g)
+    cur = conn.cursor()
+    cur.execute(f"insert into tble values ('{h}', '{g}')")
 
+h = "kva@raika.g"
+g = "Ertyuiop123456789"
+
+gtr(h, g)
