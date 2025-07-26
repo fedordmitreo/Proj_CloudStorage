@@ -39,7 +39,7 @@ celerybeat-schedule
 *.sw?
 
 # ----------------------------
-# Node.js (если у тебя frontend)
+# Node.js
 # ----------------------------
 node_modules/
 dist/
