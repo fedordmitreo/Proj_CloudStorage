@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>SignUp / SingIn</title>
-    <link rel="stylesheet" href="style.css">
+    <title>SignUp / SignIn</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
         /* Стиль для кнопки смены языка */
@@ -28,6 +28,11 @@
             background-color: white;
             color: black;
         }
+
+        .message {
+            color: red;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -41,22 +46,21 @@
 
 <div class="container">
     <div class="form-container sign-in-container">
-        <form action="#" method="post">
+        <form action="/login" method="post">
             <h1 data-lang="signin">Вход</h1>
-            <input type="email" placeholder="Email" required />
-            <input type="password" placeholder="password" required />
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Пароль" required />
             <a href="Dashboard.html" data-lang="forget">Забыли пароль?</a>
             <button type="submit" data-lang="signin">Войти</button>
         </form>
     </div>
 
-
     <div class="form-container sign-up-container">
-        <form action="#" method="signup">
+        <form action="/register" method="post">
             <h1 data-lang="signup">Регистрация</h1>
-            <input type="text" placeholder="Name" required />
-            <input type="email" placeholder="Email" required />
-            <input type="password" placeholder="password" required />
+            <input type="text" name="name" placeholder="Имя" required />
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Пароль" required />
             <button type="submit" data-lang="signup">Зарегистрироваться</button>
         </form>
     </div>
@@ -75,6 +79,18 @@
         </div>
     </div>
 </div>
-<script src="main.js"></script>
+
+<!-- Место для сообщений об ошибках и успехе -->
+<div class="message">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>
