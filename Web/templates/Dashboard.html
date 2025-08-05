@@ -61,8 +61,8 @@
     }
 
     .account-icon {
-      font-size: 24px;
-      cursor: pointer;
+      font-size: 16px;
+      cursor: default;
       color: #333;
     }
 
@@ -131,7 +131,7 @@
   <!-- Основной контент -->
   <div class="main">
     <div class="top-nav">
-      <div class="account-icon" title="Аккаунт">👤</div>
+      <div class="account-icon" title="Аккаунт">👤 {{ user_name }}</div>
       <select id="langSelect">
         <option value="ru">🇷🇺 Русский</option>
         <option value="en">🇬🇧 English</option>
