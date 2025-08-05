@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from database import register_user, authenticate_user
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = ''
 
 
 @app.route("/")
