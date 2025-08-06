@@ -28,9 +28,9 @@ def register():
     try:
         user_id = register_user(name, email, password)
         session['user_id'] = user_id
-        flash("Регистрация прошла успешно!")
+        flash("Registration was successful!")
     except Exception as e:
-        flash("Ошибка при регистрации: " + str(e))
+        flash("Error: " + str(e))
     return redirect(url_for("home"))
 
 @app.route("/login", methods=["POST"])
@@ -41,16 +41,16 @@ def login():
     if user_name:
         session['user_name'] = user_name
         session['user_id'] = get_user_id_by_email(email)
-        flash("Вход выполнен успешно!")
+        flash("Login successful!")
         return redirect(url_for("dashboard"))
     else:
-        flash("Неверный email или пароль.")
+        flash("Incorrect email or password.")
         return redirect(url_for("home"))
 
 @app.route("/upload", methods=["POST"])
 def upload():
     if 'user_id' not in session:
-        flash("Необходима авторизация.")
+        flash("Authorization required.")
         return redirect(url_for("home"))
 
     user_id = session['user_id']
@@ -60,7 +60,7 @@ def upload():
         user_folder = os.path.join(UPLOAD_FOLDER, str(user_id))
         os.makedirs(user_folder, exist_ok=True)
         file.save(os.path.join(user_folder, filename))
-        flash("Файл успешно загружен.")
+        flash("File uploaded successfully.")
     return redirect(url_for("dashboard"))
 
 @app.route("/files")
@@ -113,7 +113,7 @@ def delete_permanently():
 def download_file(filename):
     user_id = session.get("user_id")
     if not user_id:
-        flash("Вы не вошли в систему")
+        flash("You are not logged in.")
         return redirect(url_for("home"))
 
     user_folder = os.path.join("User_Files", str(user_id))
@@ -122,7 +122,7 @@ def download_file(filename):
     if os.path.exists(file_path):
         return send_from_directory(user_folder, filename, as_attachment=True)
     else:
-        flash("Файл не найден.")
+        flash("File not found.")
         return redirect(url_for("dashboard"))
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, host="0.0.0.0", port='5000')

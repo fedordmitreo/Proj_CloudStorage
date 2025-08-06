@@ -45,7 +45,7 @@ function updateContent(lang) {
 }
 
 window.onload = () => {
-    const savedLang = getCookie("site_lang") || "ru";
+    const savedLang = getCookie("site_lang") || "en";
     updateContent(savedLang);
 
     const langSelect = document.getElementById("langSelect");
