@@ -29,22 +29,8 @@
             color: black;
         }
 
-        .message-container {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
         .message {
             color: #d32f2f;
-            background-color: #ffebee;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 14px;
-            margin: 8px 0;
-            border: 1px solid #ffcdd2;
         }
     </style>
 </head>
@@ -95,11 +81,11 @@
 
 
 <!-- Место для сообщений об ошибках и успехе -->
-<div class="message-container">
+<div class="message">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
-                <p class="message">{{ message }}</p>
+                <p>{{ message }}</p>
             {% endfor %}
         {% endif %}
     {% endwith %}
