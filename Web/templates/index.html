@@ -29,24 +29,23 @@
             color: black;
         }
 
-    /* Контейнер для сообщений — размещается под формой */
-    .message-container {
-        margin-top: 30px;
-        width: 100%;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-    }
+        .message-container {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-    .message {
-        color: #d32f2f;
-        background-color: #ffebee;
-        padding: 10px 15px;
-        border-radius: 6px;
-        font-size: 14px;
-        margin: 8px 0;
-        border: 1px solid #ffcdd2;
-    }
+        .message {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin: 8px 0;
+            border: 1px solid #ffcdd2;
+        }
     </style>
 </head>
 <body>
@@ -95,9 +94,6 @@
 </div>
 
 
-</body>
-<body1>
-
 <!-- Место для сообщений об ошибках и успехе -->
 <div class="message-container">
     {% with messages = get_flashed_messages() %}
@@ -109,6 +105,7 @@
     {% endwith %}
 </div>
 
-</body1>
+
+</body>
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 </html>
