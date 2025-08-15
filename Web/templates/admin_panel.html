@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Админ-панель</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 30px;
+      color: #007BFF;
+    }
+
+    h1 {
+      font-size: 24px;
+    }
+
+    .logout {
+      background: #6c757d;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .logout:hover {
+      background: #5a6268;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f1f5f9;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .badge.admin {
+      background-color: #ffc107;
+      color: #212529;
+    }
+
+    .badge.user {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-clear, .btn-delete {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-clear {
+      background: #f1c40f;
+      color: #212529;
+    }
+
+    .btn-delete {
+      background: #e74c3c;
+      color: white;
+      margin-left: 5px;
+    }
+
+    .btn-clear:hover {
+      background: #e6b800;
+    }
+
+    .btn-delete:hover {
+      background: #c0392b;
+    }
+
+    .actions {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Админ-панель — {{ admin_name }}</h1>
+      <a href="{{ url_for('home') }}" class="logout">Выход</a>
+    </header>
+
+    <h2>Список пользователей</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Имя</th>
+          <th>Email</th>
+          <th>Роль</th>
+          <th class="actions">Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user[0] }}</td>
+            <td>{{ user[1] }}</td>
+            <td>{{ user[2] }}</td>
+            <td>
+              {% if user[3] %}
+                <span class="badge admin">Админ</span>
+              {% else %}
+                <span class="badge user">Пользователь</span>
+              {% endif %}
+            </td>
+            <td class="actions">
+              <button class="btn-clear" data-userid="{{ user[0] }}" title="Очистить все файлы пользователя">
+                🧹 Очистить файлы
+              </button>
+              {% if not user[3] %}
+                <button class="btn-delete" data-userid="{{ user[0] }}" title="Удалить пользователя и все его файлы">
+                  🗑 Удалить
+                </button>
+              {% else %}
+                <span style="font-size:12px; color:#aaa; font-style:italic;">(недоступно)</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Очистить файлы пользователя
+    document.querySelectorAll(".btn-clear").forEach(button => {
+      button.addEventListener("click", function () {
+        const userId = this.getAttribute("data-userid");
+        const userName = this.closest("tr").querySelector("td:nth-child(2)").textContent.trim();
+
+        if (!confirm(`Вы уверены, что хотите удалить ВСЕ файлы пользователя #${userId} (${userName})? Это действие нельзя отменить.`)) {
+          return;
+        }
+
+        fetch(`/admin/clear_user_files/${userId}`, { method: "POST" })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert(data.message);
+            } else {
+              alert("Ошибка: " + data.message);
+            }
+          })
+          .catch(err => {
+            console.error("Ошибка сети:", err);
+            alert("Не удалось подключиться к серверу.");
+          });
+      });
+    });
+
+    // Удалить пользователя и его файлы
+    document.querySelectorAll(".btn-delete").forEach(button => {
+      button.addEventListener("click", function () {
+        const userId = this.getAttribute("data-userid");
+        const userName = this.closest("tr").querySelector("td:nth-child(2)").textContent.trim();
+
+        if (!confirm(`⚠️ ВНИМАНИЕ: Вы собираетесь УДАЛИТЬ пользователя #${userId} (${userName}) и ВСЕ его файлы.\nЭто действие нельзя отменить.\n\nПродолжить?`)) {
+          return;
+        }
+
+        fetch(`/admin/delete_user/${userId}`, { method: "POST" })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert(data.message);
+              location.reload(); // Обновляем страницу после удаления
+            } else {
+              alert("Ошибка: " + data.message);
+            }
+          })
+          .catch(err => {
+            console.error("Ошибка сети:", err);
+            alert("Не удалось подключиться к серверу.");
+          });
+      });
+    });
+  </script>
+</body>
+</html>
