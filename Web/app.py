@@ -17,10 +17,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key')
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'User_Files')
-app.config['TRASH_FOLDER'] = os.getenv('TRASH_FOLDER', 'Trash')
-app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 100 * 1024 * 1024))
+app.secret_key = 'testtesttest111'
+
+
+UPLOAD_FOLDER = 'User_Files'
+TRASH_FOLDER = 'Trash'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['TRASH_FOLDER'] = TRASH_FOLDER
 
 def create_user_directories(user_id):
     try:
@@ -47,10 +50,10 @@ def home():
 
 @app.route("/register", methods=["POST"])
 def register():
-    name = request.form["name"]
-    email = request.form["email"]
-    password = request.form["password"]
     try:
+        name = request.form["name"]
+        email = request.form["email"]
+        password = request.form["password"]
         user_id = register_user(name, email, password)
         session['user_id'] = user_id
         session['user_name'] = name
@@ -63,18 +66,27 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
-    email = request.form["email"]
-    password = request.form["password"]
-    result = authenticate_user(email, password)
-    if result and result[0]:
-        name, is_admin_flag = result
-        user_id = get_user_id_by_email(email)
-        session['user_name'] = name
-        session['user_id'] = user_id
-        create_user_directories(user_id)
-        return redirect(url_for("admin_panel")) if is_admin_flag else redirect(url_for("dashboard"))
-    else:
-        flash("Неверный email или пароль.", "error")
+    try:
+        email = request.form["email"]
+        password = request.form["password"]
+        result = authenticate_user(email, password)
+        if result and result[0]:
+            name, is_admin_flag = result
+            user_id = get_user_id_by_email(email)
+            if user_id is None:
+                flash("Ошибка: пользователь не найден.", "error")
+                return redirect(url_for("home"))
+
+            session['user_name'] = name
+            session['user_id'] = user_id
+            create_user_directories(user_id)
+            return redirect(url_for("admin_panel")) if is_admin_flag else redirect(url_for("dashboard"))
+        else:
+            flash("Неверный email или пароль.", "error")
+            return redirect(url_for("home"))
+    except Exception as e:
+        logger.error(f"Ошибка при входе: {e}")
+        flash("Произошла ошибка на сервере. Попробуйте позже.", "error")
         return redirect(url_for("home"))
 
 @app.route("/dashboard")
@@ -115,11 +127,10 @@ def upload():
         return jsonify({"success": False, "message": "Файл не выбран"}), 400
 
     try:
-        filename = file.filename  # ❌ Без secure_filename
+        filename = file.filename
         user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id))
         filepath = os.path.join(user_folder, filename)
 
-        # Защита от перезаписи
         if os.path.exists(filepath):
             name, ext = os.path.splitext(filename)
             timestamp = int(time.time())
@@ -260,6 +271,7 @@ def download_file(filename):
         flash("Файл не найден.", "error")
         return redirect(url_for("dashboard"))
 
+
 @app.route("/admin/clear_user_files/<int:user_id>", methods=["POST"])
 def clear_user_files(user_id):
     current_user = get_current_user()
@@ -312,4 +324,4 @@ def health():
 if __name__ == "__main__":
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['TRASH_FOLDER'], exist_ok=True)
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
