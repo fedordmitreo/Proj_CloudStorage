@@ -120,7 +120,9 @@ def upload():
         return jsonify({"success": False, "message": "Требуется авторизация"}), 401
 
     user_id = session['user_id']
-    create_user_directories(user_id)
+    user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id))
+    os.makedirs(user_folder, exist_ok=True)
+    create_user_directories(user_id)  # убедитесь, что эта функция не мешает
 
     file = request.files.get('file')
     if not file or file.filename == '':
@@ -128,7 +130,6 @@ def upload():
 
     try:
         filename = file.filename
-        user_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id))
         filepath = os.path.join(user_folder, filename)
 
         if os.path.exists(filepath):
@@ -137,11 +138,12 @@ def upload():
             filename = f"{name}_{timestamp}{ext}"
             filepath = os.path.join(user_folder, filename)
 
+        logger.debug(f"Загружаемый файл: {filename}")
         file.save(filepath)
-        logger.info(f"Файл загружен: {filename}")
+        logger.info(f"Файл успешно сохранен: {filename}")
         return jsonify({"success": True, "message": "Файл успешно загружен"}), 200
     except Exception as e:
-        logger.error(f"Ошибка загрузки: {e}")
+        logger.error(f"Ошибка при сохранении файла: {e}")
         return jsonify({"success": False, "message": "Ошибка сохранения"}), 500
 
 @app.route("/files")
