@@ -1,17 +1,14 @@
 import psycopg2
 import bcrypt
-import os
-
-db_params = {
-    'dbname': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'host': os.getenv('DB_HOST'),
-    'port': os.getenv('DB_PORT')
-}
 
 def get_connection():
-    return psycopg2.connect(**db_params)
+    return psycopg2.connect(
+        dbname='storagedata',
+        user='postgres',
+        password='09032011',
+        host='10.0.0.102',
+        port='5432'
+    )
 
 def register_user(name, email, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -25,6 +22,8 @@ def register_user(name, email, password):
                 )
                 user_id = cur.fetchone()[0]
         return user_id
+    except psycopg2.IntegrityError:
+        raise Exception("Email уже зарегистрирован")
     finally:
         conn.close()
 
