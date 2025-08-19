@@ -3,69 +3,93 @@ import bcrypt
 import os
 
 db_params = {
-    'dbname': 'storagedata',
-    'user': 'postgres',
-    'password': '09032011',
-    'host': '10.0.0.102',
-    'port': '5432'
+    'dbname': os.getenv('DB_NAME'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'host': os.getenv('DB_HOST'),
+    'port': os.getenv('DB_PORT')
 }
-
-USER_FILES_BASE_DIR = "User_Files"
-
 
 def get_connection():
     return psycopg2.connect(**db_params)
 
-
 def register_user(name, email, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute(
-        "INSERT INTO users (name, email, password, IsAdmin) VALUES (%s, %s, %s, %s) RETURNING user_id;",
-        (name, email, hashed_password, False)
-    )
-    user_id = cursor.fetchone()[0]
-    connection.commit()
-    cursor.close()
-    connection.close()
-
-    user_folder_path = os.path.join(USER_FILES_BASE_DIR, str(user_id))
-    os.makedirs(user_folder_path, exist_ok=True)
-
-    return user_id
-
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO users (name, email, password, IsAdmin) VALUES (%s, %s, %s, %s) RETURNING user_id;",
+                    (name, email, hashed_password, False)
+                )
+                user_id = cur.fetchone()[0]
+        return user_id
+    finally:
+        conn.close()
 
 def authenticate_user(email, password):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT name, password, IsAdmin FROM users WHERE email = %s;", (email,))
-    result = cursor.fetchone()
-    cursor.close()
-    connection.close()
-
-    if result:
-        name, stored_password, is_admin = result
-        if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-            return name, is_admin
-    return None, False
-
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT name, password, IsAdmin FROM users WHERE email = %s;", (email,))
+                result = cur.fetchone()
+        if result:
+            name, stored_password, is_admin = result
+            if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+                return name, is_admin
+        return None, False
+    finally:
+        conn.close()
 
 def get_user_id_by_email(email):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT user_id FROM users WHERE email = %s;", (email,))
-    user_id = cursor.fetchone()[0]
-    cursor.close()
-    connection.close()
-    return user_id
-
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT user_id FROM users WHERE email = %s;", (email,))
+                row = cur.fetchone()
+                return row[0] if row else None
+    finally:
+        conn.close()
 
 def get_all_users():
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT user_id, name, email, IsAdmin FROM users ORDER BY name;")
-    users = cursor.fetchall()
-    cursor.close()
-    connection.close()
-    return users
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT user_id, name, email, IsAdmin FROM users ORDER BY name;")
+                return cur.fetchall()
+    finally:
+        conn.close()
+
+def user_exists(user_id):
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1 FROM users WHERE user_id = %s;", (user_id,))
+                return cur.fetchone() is not None
+    finally:
+        conn.close()
+
+def is_admin(user_id):
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT IsAdmin FROM users WHERE user_id = %s;", (user_id,))
+                row = cur.fetchone()
+                return row[0] if row else False
+    finally:
+        conn.close()
+
+def delete_user_from_db(user_id):
+    conn = get_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE user_id = %s;", (user_id,))
+    finally:
+        conn.close()
