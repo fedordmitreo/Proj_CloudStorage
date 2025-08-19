@@ -4,196 +4,7 @@
   <meta charset="UTF-8" />
   <title>Личный кабинет</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    body {
-      display: flex;
-      height: 100vh;
-      background-color: #f4f4f9;
-    }
-
-    .sidebar {
-      width: 220px;
-      background-color: #ffffff;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .sidebar h2 {
-      font-size: 18px;
-      color: #333;
-      cursor: pointer;
-    }
-
-    .sidebar a {
-      text-decoration: none;
-      color: #555;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .sidebar a:hover {
-      color: #007BFF;
-    }
-
-    .main {
-      flex-grow: 1;
-      position: relative;
-      padding: 30px;
-    }
-
-    .top-nav {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .account-icon {
-      font-size: 16px;
-      color: #333;
-    }
-
-    #langSelect {
-      padding: 6px 10px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      background-color: white;
-      color: #333;
-    }
-
-    .content {
-      margin-top: 60px;
-    }
-
-    .upload-section {
-      margin-top: 20px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      max-width: 400px;
-    }
-
-    .upload-section input[type="file"] {
-      margin-bottom: 10px;
-      width: 100%;
-    }
-
-    .upload-section button {
-      padding: 8px 14px;
-      background-color: #007BFF;
-      border: none;
-      color: white;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .upload-section button:hover {
-      background-color: #0069d9;
-    }
-
-    .progress-container {
-      margin-top: 10px;
-      display: none;
-    }
-
-    .progress-bar {
-      height: 10px;
-      background: #e0e0e0;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: #007BFF;
-      width: 0%;
-      transition: width 0.2s;
-    }
-
-    .progress-text {
-      text-align: center;
-      font-size: 14px;
-      margin-top: 5px;
-      color: #555;
-    }
-
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .file-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .file-name {
-      flex-grow: 1;
-      margin-right: 10px;
-      word-break: break-all;
-    }
-
-    .file-actions button {
-      margin-left: 5px;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .delete-btn {
-      background-color: #e74c3c;
-      color: white;
-    }
-
-    .restore-btn {
-      background-color: #f1c40f;
-      color: black;
-    }
-
-    .flash-messages {
-      margin-top: 20px;
-      list-style: none;
-      padding: 10px;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-
-    .flash-messages.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .flash-messages.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-  </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styledash.css') }}">
 </head>
 <body>
 
@@ -201,7 +12,6 @@
     <h2><a href="#" onclick="showSection('files')" data-lang="my_files">Ваши файлы</a></h2>
     <h2><a href="#" onclick="showSection('trash')" data-lang="trash">Корзина</a></h2>
   </div>
-
   <div class="main">
     <div class="top-nav">
       <div class="account-icon">👤 {{ user_name }}</div>
@@ -210,15 +20,12 @@
         <option value="en">🇬🇧 English</option>
       </select>
     </div>
-
     <div class="content">
-      <h1 data-lang="welcome">Добро пожаловать в ваш кабинет!</h1>
-
+      <h1 data-lang="welcome_dashboard">Добро пожаловать в ваш кабинет!</h1>
       <div class="upload-section">
         <form id="uploadForm" enctype="multipart/form-data">
           <input type="file" name="file" id="fileInput" required>
-          <button type="submit" data-lang="upload">Добавить файл</button>
-
+          <button type="submit" data-lang="upload_file">Добавить файл</button>
           <div class="progress-container">
             <div class="progress-bar">
               <div class="progress-fill"></div>
@@ -227,7 +34,6 @@
           </div>
         </form>
       </div>
-
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <ul class="flash-messages success">
@@ -237,13 +43,11 @@
           </ul>
         {% endif %}
       {% endwith %}
-
       <div class="file-list" id="sectionContent">
-        Загрузка...
+        Download...
       </div>
     </div>
   </div>
-
   <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 </body>
 </html>

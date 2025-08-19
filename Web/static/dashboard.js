@@ -1,7 +1,7 @@
 function showSection(section) {
   const sectionContent = document.getElementById("sectionContent");
   if (!sectionContent) return;
-  sectionContent.innerHTML = '<p style="color: #777;">Загрузка...</p>';
+  sectionContent.innerHTML = '<p style="color: #777;">Download..</p>';
 
   const url = section === "files" ? "/files" : "/trash";
   fetch(url)
@@ -14,7 +14,7 @@ function showSection(section) {
       }
     })
     .catch(err => {
-      sectionContent.innerHTML = '<p style="color: #e74c3c;">Ошибка загрузки</p>';
+      sectionContent.innerHTML = '<p style="color: #e74c3c;">Error</p>';
       console.error("Fetch error:", err);
     });
 }
@@ -24,7 +24,7 @@ function renderFileList(files) {
   container.innerHTML = "";
 
   if (files.length === 0) {
-    container.innerHTML = "<p>Нет файлов.</p>";
+    container.innerHTML = "<p data-lang='nof'>Нет файлов.</p>";
     return;
   }
 
@@ -34,8 +34,8 @@ function renderFileList(files) {
     el.innerHTML = `
       <div class="file-name">${file}</div>
       <div class="file-actions">
-        <a href="/download/${file}"><button class="restore-btn">📥 Скачать</button></a>
-        <button class="delete-btn" onclick="deleteFile('${escapeHtml(file)}')">🗑 Удалить</button>
+        <a href="/download/${file}"><button data-lang="download" class="restore-btn">📥 Скачать</button></a>
+        <button class="delete-btn" data-lang="del" onclick="deleteFile('${escapeHtml(file)}')">❌ Удалить</button>
       </div>
     `;
     container.appendChild(el);
@@ -47,7 +47,7 @@ function renderTrashList(files) {
   container.innerHTML = "";
 
   if (files.length === 0) {
-    container.innerHTML = "<p>Корзина пуста.</p>";
+    container.innerHTML = "<p data-lang='nof'>Корзина пуста.</p>";
     return;
   }
 
@@ -57,8 +57,8 @@ function renderTrashList(files) {
     el.innerHTML = `
       <div class="file-name">${file}</div>
       <div class="file-actions">
-        <button class="restore-btn" onclick="restoreFile('${escapeHtml(file)}')">🔄 Восстановить</button>
-        <button class="delete-btn" onclick="deleteForever('${escapeHtml(file)}')">❌ Удалить навсегда</button>
+        <button class="restore-btn" data-lang="vost" onclick="restoreFile('${escapeHtml(file)}')">🔄 Восстановить</button>
+        <button class="delete-btn" data-lang="del" onclick="deleteForever('${escapeHtml(file)}')">❌ Удалить</button>
       </div>
     `;
     container.appendChild(el);
@@ -114,13 +114,21 @@ const langStrings = {
     my_files: "Ваши файлы",
     trash: "Корзина",
     welcome_dashboard: "Добро пожаловать в ваш кабинет!",
-    upload_file: "Добавить файл"
+    upload_file: "Добавить файл",
+    vost: "🔄 Восстановить",
+    del: "❌ Удалить",
+    download: "📥 Скачать",
+    nof: "Нет файлов"
   },
   en: {
     my_files: "My Files",
     trash: "Trash",
     welcome_dashboard: "Welcome to your dashboard!",
-    upload_file: "Add file"
+    upload_file: "Add file",
+    vost: "🔄 Restore",
+    del: "❌ Delete",
+    download: "📥 Download",
+    nof: "No files"
   }
 };
 
@@ -149,7 +157,7 @@ function updateContent(lang) {
 }
 
 window.onload = () => {
-  const savedLang = getCookie("site_lang") || "ru";
+  const savedLang = getCookie("site_lang") || "en";
   setLanguage(savedLang);
   const langSelect = document.getElementById("langSelect");
   if (langSelect) {
