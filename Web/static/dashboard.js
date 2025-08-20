@@ -1,7 +1,16 @@
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function showSection(section) {
   const sectionContent = document.getElementById("sectionContent");
   if (!sectionContent) return;
-  sectionContent.innerHTML = '<p style="color: #777;">Download..</p>';
+  sectionContent.innerHTML = '<p style="color: #777;">Загрузка...</p>';
 
   const url = section === "files" ? "/files" : "/trash";
   fetch(url)
@@ -14,11 +23,10 @@ function showSection(section) {
       }
     })
     .catch(err => {
-      sectionContent.innerHTML = '<p style="color: #e74c3c;">Error</p>';
+      sectionContent.innerHTML = '<p style="color: #e74c3c;">Ошибка загрузки</p>';
       console.error("Fetch error:", err);
     });
 }
-
 function renderFileList(files) {
   const container = document.getElementById("sectionContent");
   container.innerHTML = "";
@@ -32,10 +40,10 @@ function renderFileList(files) {
     const el = document.createElement("div");
     el.className = "file-item";
     el.innerHTML = `
-      <div class="file-name">${file}</div>
+      <div class="file-name">${escapeHtml(file)}</div>
       <div class="file-actions">
-        <a href="/download/${file}"><button data-lang="download" class="restore-btn">📥 Скачать</button></a>
-        <button class="delete-btn" data-lang="del" onclick="deleteFile('${escapeHtml(file)}')">❌ Удалить</button>
+        <a href="/download/${encodeURIComponent(file)}"><button data-lang="download" class="restore-btn">📥 Скачать</button></a>
+        <button class="delete-btn" data-lang="del" onclick="deleteFile('${escapeHtml(file)}')">🗑 Удалить</button>
       </div>
     `;
     container.appendChild(el);
@@ -55,16 +63,17 @@ function renderTrashList(files) {
     const el = document.createElement("div");
     el.className = "file-item";
     el.innerHTML = `
-      <div class="file-name">${file}</div>
+      <div class="file-name">${escapeHtml(file)}</div>
       <div class="file-actions">
         <button class="restore-btn" data-lang="vost" onclick="restoreFile('${escapeHtml(file)}')">🔄 Восстановить</button>
-        <button class="delete-btn" data-lang="del" onclick="deleteForever('${escapeHtml(file)}')">❌ Удалить</button>
+        <button class="delete-btn" data-lang="del" onclick="deleteForever('${escapeHtml(file)}')">❌ Удалить навсегда</button>
       </div>
     `;
     container.appendChild(el);
   });
 }
 
+// Удаление файла в корзину
 function deleteFile(filename) {
   fetch("/delete_file", {
     method: "POST",
@@ -94,20 +103,6 @@ function deleteForever(filename) {
   .then(() => showSection("trash"))
   .catch(() => showSection("trash"));
 }
-
-function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  showSection("files");
-});
-
 
 const langStrings = {
   ru: {
@@ -156,12 +151,73 @@ function updateContent(lang) {
   });
 }
 
-window.onload = () => {
-  const savedLang = getCookie("site_lang") || "en";
+document.addEventListener("DOMContentLoaded", () => {
+  const uploadForm = document.getElementById("uploadForm");
+  if (uploadForm) {
+    uploadForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Пожалуйста, выберите файл");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const progressContainer = document.querySelector(".progress-container");
+      const progressFill = document.querySelector(".progress-fill");
+      const progressText = document.querySelector(".progress-text");
+
+      progressContainer.style.display = "block";
+      progressFill.style.width = "0%";
+      progressText.textContent = "0%";
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressFill.style.width = percent + "%";
+          progressText.textContent = percent + "%";
+        }
+      });
+
+      xhr.addEventListener("load", function() {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            fileInput.value = "";
+            progressContainer.style.display = "none";
+            showSection("files");
+          } else {
+            alert("Ошибка: " + (response.message || "Неизвестная ошибка"));
+            progressContainer.style.display = "none";
+          }
+        } else {
+          alert("Ошибка сервера: " + xhr.status);
+          progressContainer.style.display = "none";
+        }
+      });
+
+      xhr.addEventListener("error", function() {
+        alert("Ошибка сети");
+        progressContainer.style.display = "none";
+      });
+
+      xhr.open("POST", "/upload");
+      xhr.send(formData);
+    });
+  }
+
+  const savedLang = getCookie("site_lang") || "ru";
   setLanguage(savedLang);
   const langSelect = document.getElementById("langSelect");
   if (langSelect) {
     langSelect.value = savedLang;
     langSelect.addEventListener("change", () => setLanguage(langSelect.value));
   }
-};
+  showSection("files");
+});
