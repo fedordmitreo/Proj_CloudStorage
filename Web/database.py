@@ -1,31 +1,36 @@
 import psycopg2
 import bcrypt
 
+
+
+db = "database"
+user = "ssss"
+password = "pass"
+host = 555
+port = 5432
+
 def get_connection():
     return psycopg2.connect(
-        dbname='storagedata',
-        user='postgres',
-        password='09032011',
-        host='10.0.0.102',
-        port='5432'
+        dbname=db,
+        user=user,
+        password=password,
+        host=host,
+        port=port
     )
 
 def register_user(name, email, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     conn = get_connection()
-    try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "INSERT INTO users (name, email, password, IsAdmin) VALUES (%s, %s, %s, %s) RETURNING user_id;",
-                    (name, email, hashed_password, False)
-                )
-                user_id = cur.fetchone()[0]
-        return user_id
-    except psycopg2.IntegrityError:
-        raise Exception("Email уже зарегистрирован")
-    finally:
-        conn.close()
+    cur = conn.cursor()
+    cur.execute(
+      "INSERT INTO users (name, email, password, IsAdmin) VALUES (%s, %s, %s, %s) RETURNING user_id;",
+    (name, email, hashed_password, False)
+    )
+    user_id = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return user_id
+
 
 def authenticate_user(email, password):
     conn = get_connection()

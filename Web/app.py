@@ -3,6 +3,7 @@ import os
 import logging
 import time
 import shutil
+from bot import log
 from database import (
     register_user,
     authenticate_user,
@@ -15,10 +16,10 @@ from database import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+g = 555
 
 app = Flask(__name__)
-app.secret_key = 'testtesttest111'
-
+app.secret_key = g
 
 UPLOAD_FOLDER = 'User_Files'
 TRASH_FOLDER = 'Trash'
@@ -33,6 +34,8 @@ def create_user_directories(user_id):
         os.makedirs(user_trash, exist_ok=True)
     except Exception as e:
         logger.error(f"Ошибка при создании папок для пользователя {user_id}: {e}")
+        log(f"Ошибка при создании папок для пользователя {user_id}: {e}")
+
 
 def get_current_user():
     user_id = session.get('user_id')
@@ -59,9 +62,11 @@ def register():
         session['user_name'] = name
         create_user_directories(user_id)
         flash("Регистрация прошла успешно!", "success")
+        log(f"Регистрация прошла успешно! {name} {user_id}")
         return redirect(url_for("dashboard"))
     except Exception as e:
         flash(f"Ошибка регистрации: {str(e)}", "error")
+        log(f"Ошибка регистрации: {str(e)}")
         return redirect(url_for("home"))
 
 @app.route("/login", methods=["POST"])
@@ -75,6 +80,7 @@ def login():
             user_id = get_user_id_by_email(email)
             if user_id is None:
                 flash("Ошибка: пользователь не найден.", "error")
+                log(f"Ошибка: пользователь не найден. {email}")
                 return redirect(url_for("home"))
 
             session['user_name'] = name
@@ -83,10 +89,12 @@ def login():
             return redirect(url_for("admin_panel")) if is_admin_flag else redirect(url_for("dashboard"))
         else:
             flash("Неверный email или пароль.", "error")
+            log(f"Неверный email или пароль. {session['user_id']}")
             return redirect(url_for("home"))
     except Exception as e:
         logger.error(f"Ошибка при входе: {e}")
         flash("Произошла ошибка на сервере. Попробуйте позже.", "error")
+        log(f"Ошибка при входе: {e}")
         return redirect(url_for("home"))
 
 @app.route("/dashboard")
@@ -141,9 +149,11 @@ def upload():
         logger.debug(f"Загружаемый файл: {filename}")
         file.save(filepath)
         logger.info(f"Файл успешно сохранен: {filename}")
+        log(f"Файл сохранён {user_id} {filename}")
         return jsonify({"success": True, "message": "Файл успешно загружен"}), 200
     except Exception as e:
         logger.error(f"Ошибка при сохранении файла: {e}")
+        log(f"Файл ошибка {user_id} {file.filename}")
         return jsonify({"success": False, "message": "Ошибка сохранения"}), 500
 
 @app.route("/files")
@@ -159,6 +169,7 @@ def list_files():
         return jsonify(files)
     except Exception as e:
         logger.error(f"Ошибка чтения файлов: {e}")
+        log(f"Ошибка чтения файлов: {e} {user_id}")
         return jsonify([])
 
 @app.route("/delete_file", methods=["POST"])
@@ -191,6 +202,7 @@ def delete_file():
         return jsonify(success=True)
     except Exception as e:
         logger.error(f"Ошибка удаления: {e}")
+        log(f"Ошибка удаления: {e} {user_id} {filename}")
         return jsonify(success=False), 500
 
 @app.route("/trash")
@@ -206,6 +218,7 @@ def list_trash():
         return jsonify(files)
     except Exception as e:
         logger.error(f"Ошибка корзины: {e}")
+        log(f"Ошибка корзины: {e} {user_id}")
         return jsonify([])
 
 @app.route("/restore_file", methods=["POST"])
@@ -235,6 +248,7 @@ def restore_file():
         return jsonify(success=True)
     except Exception as e:
         logger.error(f"Ошибка восстановления: {e}")
+        log(f"Ошибка восстановления: {e} {user_id} {filename}")
         return jsonify(success=False), 500
 
 @app.route("/delete_permanently", methods=["POST"])
@@ -256,6 +270,7 @@ def delete_permanently():
         return jsonify(success=True)
     except Exception as e:
         logger.error(f"Ошибка удаления: {e}")
+        log(f"Ошибка удаления: {e} {user_id} {filename}")
         return jsonify(success=False), 500
 
 @app.route("/download/<filename>")
@@ -271,6 +286,7 @@ def download_file(filename):
         return send_from_directory(user_folder, filename, as_attachment=True)
     else:
         flash("Файл не найден.", "error")
+        log(f"Файл не найден {session['user_id']} {filename}")
         return redirect(url_for("dashboard"))
 
 
@@ -293,6 +309,7 @@ def clear_user_files(user_id):
         return jsonify({"success": True, "message": "Файлы очищены"})
     except Exception as e:
         logger.error(f"Ошибка очистки: {e}")
+        log(f"Ошибка очистки админ: {e} {user_id}")
         return jsonify({"success": False}), 500
 
 @app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
@@ -317,6 +334,7 @@ def delete_user(user_id):
         return jsonify({"success": True, "message": "Пользователь удалён"})
     except Exception as e:
         logger.error(f"Ошибка удаления: {e}")
+        log(f"Ошибка удаления: {e}")
         return jsonify({"success": False}), 500
 
 @app.route("/health")

@@ -15,6 +15,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+*.env
 
 # ----------------------------
 # Django
@@ -53,3 +54,9 @@ yarn-error.log*
 # ----------------------------
 .DS_Store
 Thumbs.db
+
+# ----------------------------
+# Directory
+# ----------------------------
+Trash
+User_Files
