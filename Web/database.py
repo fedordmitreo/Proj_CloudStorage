@@ -1,12 +1,10 @@
 import psycopg2
 import bcrypt
 
-
-
 db = "database"
-user = "ssss"
-password = "pass"
-host = 555
+user = "tyr"
+password = "postgresEQW1"
+host = "10.0.0.200"
 port = 5432
 
 def get_connection():

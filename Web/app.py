@@ -16,7 +16,7 @@ from database import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-g = 555
+g = 'testtesttest111'
 
 app = Flask(__name__)
 app.secret_key = g
@@ -306,6 +306,7 @@ def clear_user_files(user_id):
             shutil.rmtree(user_trash)
         os.makedirs(user_upload, exist_ok=True)
         os.makedirs(user_trash, exist_ok=True)
+        log(f"Файлы очищены админ: {user_id}")
         return jsonify({"success": True, "message": "Файлы очищены"})
     except Exception as e:
         logger.error(f"Ошибка очистки: {e}")
@@ -344,4 +345,4 @@ def health():
 if __name__ == "__main__":
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['TRASH_FOLDER'], exist_ok=True)
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=False, host="0.0.0.0", port=80)

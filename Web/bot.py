@@ -1,7 +1,7 @@
 import requests
 
-token = "TOKEN"
-chat_id = 555
+token = "**"
+chat_id = -1
 
 def log(message: str):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
